@@ -20,19 +20,19 @@ sentiment.init = function () {
   //var sentiment_url = 'https://community-sentiment.p.mashape.com/text/';
   var sentiment_url = 'https://twinword-sentiment-analysis.p.mashape.com/analyze/';
   return unirest.post(sentiment_url)
-    .header('X-Mashape-Key', config.sentiment)
-    .header('Content-Type', 'application/x-www-form-urlencoded')
-    .header('Accept', 'application/json')
+    .headers({'X-Mashape-Key': config.sentiment,
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Accept': 'application/json'});
 }
 
 exports.analyze_text = function(req, res) {
-  var text = req.params.text;
+  var text = req.body.text;
   var httpCall = sentiment.init();
 
   if (typeof text !== 'undefined') {
-    httpCall.send('txt=' + text).end(function (result) {
+    httpCall.send('text=' + text).end(function (result) {
       if (typeof result.body !== 'undefined') {
-        return result.body;
+        res.send(result.body);
         /*
         //var sentim = result.body.result.sentiment
         var sentim = result.body.type
@@ -48,12 +48,12 @@ exports.analyze_text = function(req, res) {
         }
         */
       } else {
-        console.log('Sentiment API is down')
+        console.warn('Sentiment API is down')
         console.log(result.body)
       }
     });
   } else {
-    console.log({'error': 'Please enter valid text'});
+    console.warn({'error': 'Please enter valid text'});
     res.json({'error': 'Please enter valid text'});
   }
 };
@@ -63,14 +63,14 @@ exports.search_tweets = function(req, res) {
   if (typeof params.q !== 'undefined') {
     client.get('search/tweets', params, function(error, tweets, response) {
       if (error) {
-        console.log('Something went wrong while SEARCHING...')
+        console.warn('Something went wrong while SEARCHING...')
         res.send(error);
       } else {
         res.json(tweets);
       }
     });
   } else {
-    console.log({'error': 'Please enter valid search query'});
+    console.warn({'error': 'Please enter valid search query'});
     res.json({'error': 'Please enter valid search query'});
   }
 };
