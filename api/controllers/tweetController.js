@@ -17,12 +17,13 @@ var client = new twit({
 */
 var sentiment = {}
 sentiment.init = function () {
-  //var sentiment_url = 'https://community-sentiment.p.mashape.com/text/';
-  var sentiment_url = 'https://twinword-sentiment-analysis.p.mashape.com/analyze/';
+  var sentiment_url = 'https://webit-text-analytics.p.rapidapi.com/sentiment';
   return unirest.post(sentiment_url)
-    .headers({'X-Mashape-Key': config.sentiment,
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'Accept': 'application/json'});
+    .headers({
+      "x-rapidapi-key": config.sentiment,
+      "x-rapidapi-host": "webit-text-analytics.p.rapidapi.com",
+      "useQueryString": true
+    });
 }
 
 exports.analyze_text = function(req, res) {
@@ -30,7 +31,10 @@ exports.analyze_text = function(req, res) {
   var httpCall = sentiment.init();
 
   if (typeof text !== 'undefined') {
-    httpCall.send('text=' + text).end(function (result) {
+    httpCall.query({
+      "language": "en",
+      "text": text
+    }).end(function (result) {
       if (typeof result.body !== 'undefined') {
         res.send(result.body);
         /*
